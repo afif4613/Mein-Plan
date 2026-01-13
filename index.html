@@ -1,0 +1,1335 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Mein Plan</title>
+
+  <!-- iOS homescreen feel -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mein Plan">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <style>
+    :root{
+      --bg:#f4f5f7;
+      --panel:#ffffff;
+      --panel2:#fcfcfd;
+      --text:#0b1220;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --shadow: 0 14px 34px rgba(2,6,23,.08);
+
+      --ok:#16a34a;
+      --bad:#dc2626;
+      --chip:#f1f5f9;
+
+      --radius:18px;
+      --radius2:14px;
+      --gap:14px;
+
+      --tap: 44px; /* iOS tap size */
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    /* Top */
+    .topbar{
+      position:sticky; top:0; z-index:20;
+      padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
+      background: rgba(244,245,247,.86);
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid var(--line);
+    }
+    .toprow{
+      max-width:1100px; margin:0 auto;
+      display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .title{
+      display:flex; flex-direction:column; gap:4px; min-width: 200px;
+    }
+    .title h1{margin:0; font-size:16px; letter-spacing:.2px}
+    .title .sub{font-size:12px; color:var(--muted)}
+
+    .chiprow{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; align-items:center}
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:var(--chip);
+      color:var(--muted);
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .chip b{color:var(--text)}
+
+    .btn{
+      height: var(--tap);
+      padding:0 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      user-select:none;
+    }
+    .btn:hover{background: rgba(107,114,128,.06)}
+    .btn.primary{
+      background:#111827;
+      color:#fff;
+      border-color:transparent;
+    }
+    .btn.ghost{background:transparent}
+    .btn.small{height:38px; border-radius:12px; padding:0 10px; font-size:13px}
+
+    /* Layout */
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:16px;
+      padding-bottom: calc(92px + env(safe-area-inset-bottom));
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: var(--gap);
+      margin-top: var(--gap);
+    }
+    .card{
+      grid-column: span 12;
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--panel) 0%, var(--panel2) 100%);
+      box-shadow: var(--shadow);
+      padding:16px;
+    }
+    .card h2{margin:0 0 10px; font-size:15px; letter-spacing:.2px}
+    .muted{color:var(--muted); font-size:12px; line-height:1.35}
+
+    @media(min-width: 980px){
+      .span8{grid-column: span 8}
+      .span4{grid-column: span 4}
+      .span6{grid-column: span 6}
+    }
+
+    /* Accordion */
+    details.acc{
+      border:1px solid var(--line);
+      border-radius: var(--radius2);
+      background: rgba(107,114,128,.05);
+      overflow:hidden;
+    }
+    details.acc + details.acc{margin-top:10px}
+    details.acc summary{
+      cursor:pointer;
+      padding:12px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      list-style:none;
+      user-select:none;
+      font-weight:800;
+      font-size:14px;
+    }
+    details.acc summary::-webkit-details-marker{display:none}
+    .acc-body{padding:12px 14px; border-top:1px solid var(--line)}
+
+    /* Inputs */
+    .inputs{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    input, select, textarea{
+      height: var(--tap);
+      padding:0 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      outline:none;
+      min-width: 170px;
+    }
+    textarea{
+      height:auto;
+      min-height: 120px;
+      padding: 12px;
+      width:100%;
+      resize:vertical;
+    }
+    input:focus, select:focus, textarea:focus{border-color: rgba(107,114,128,.65)}
+    .grow{flex:1; min-width: 220px}
+
+    /* KPIs */
+    .kpis{display:grid; gap:10px; grid-template-columns: repeat(3, 1fr); margin-top:10px}
+    @media(max-width:520px){.kpis{grid-template-columns:1fr}}
+    .kpi{
+      border:1px solid var(--line);
+      border-radius: var(--radius2);
+      padding:12px;
+      background: rgba(107,114,128,.05);
+    }
+    .kpi .v{font-size:22px; font-weight:900}
+    .kpi .t{font-size:12px; color:var(--muted); margin-top:2px}
+
+    /* Progress */
+    .progressRow{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .bar{
+      height:10px; border-radius: 999px;
+      border:1px solid var(--line);
+      background: rgba(107,114,128,.08);
+      overflow:hidden;
+      flex:1; min-width: 200px;
+    }
+    .bar > div{height:100%; width:0%; background: linear-gradient(90deg, rgba(15,23,42,.92), rgba(107,114,128,.92))}
+
+    /* List items */
+    .list{display:flex; flex-direction:column; gap:10px}
+    .item{
+      display:flex; gap:12px; justify-content:space-between; align-items:flex-start;
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius: var(--radius2);
+      background: rgba(255,255,255,.75);
+      touch-action: manipulation;
+    }
+    .left{display:flex; gap:12px; align-items:flex-start; flex:1}
+    .dot{
+      width:10px; height:10px; border-radius:99px; margin-top:6px;
+      background: rgba(107,114,128,.45);
+      border:1px solid rgba(107,114,128,.25);
+      flex:0 0 auto;
+    }
+    .dot.ok{background: rgba(22,163,74,.85); border-color: rgba(22,163,74,.25)}
+    .dot.bad{background: rgba(220,38,38,.85); border-color: rgba(220,38,38,.25)}
+    .it-title{font-weight:850}
+    .it-note{margin-top:3px; font-size:12px; color:var(--muted)}
+    .tags{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+    .tag{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: var(--chip);
+      color: var(--muted);
+    }
+    .tag.ok{color: rgba(22,163,74,1); border-color: rgba(22,163,74,.22); background: rgba(22,163,74,.07)}
+    .tag.bad{color: rgba(220,38,38,1); border-color: rgba(220,38,38,.22); background: rgba(220,38,38,.07)}
+
+    .actions{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    .icon{
+      width:44px; height:44px;
+      border-radius: 16px;
+      border:1px solid var(--line);
+      background: transparent;
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      color: var(--text);
+      user-select:none;
+    }
+    .icon:hover{background: rgba(107,114,128,.06)}
+    .icon.ok{border-color: rgba(22,163,74,.25)}
+    .icon.bad{border-color: rgba(220,38,38,.25)}
+    .icon.drag{cursor:grab}
+
+    /* Filters */
+    .filters{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      margin-top:10px;
+    }
+    .toggle{
+      height: 40px;
+      padding:0 10px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background: var(--panel);
+      cursor:pointer;
+      font-size:13px;
+      color: var(--text);
+    }
+    .toggle.active{
+      background: rgba(107,114,128,.10);
+      border-color: rgba(107,114,128,.25);
+      font-weight:800;
+    }
+
+    /* Pages */
+    .page{display:none}
+    .page.active{display:block}
+
+    /* Bottom nav */
+    .bottomNav{
+      position:fixed; left:0; right:0; bottom:0;
+      padding:10px 10px calc(10px + env(safe-area-inset-bottom));
+      border-top:1px solid var(--line);
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      z-index:30;
+    }
+    .bottomNav .row{
+      max-width:1100px; margin:0 auto;
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap:8px;
+    }
+    .bottomNav button{
+      height: 54px;
+      border:1px solid var(--line);
+      background:transparent;
+      border-radius: 18px;
+      padding:8px 6px;
+      font-size:12px;
+      cursor:pointer;
+      color:var(--text);
+      line-height:1.1;
+    }
+    .bottomNav button.active{
+      background: rgba(107,114,128,.10);
+      font-weight:900;
+    }
+
+    /* Modal */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(2,6,23,.45);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:60;
+    }
+    .modal{
+      width: min(760px, 100%);
+      border-radius: 22px;
+      border:1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding:16px;
+    }
+    .modalHead{display:flex; justify-content:space-between; align-items:center; gap:10px}
+    .modalHead h3{margin:0; font-size:15px}
+    .divider{height:1px; background:var(--line); margin:12px 0}
+    .modalGrid{display:grid; grid-template-columns: repeat(12, 1fr); gap:12px}
+    .col6{grid-column: span 12}
+    @media(min-width: 800px){.col6{grid-column: span 6}}
+
+    /* Drag visuals */
+    .dragging{opacity:.55}
+    .dropHint{outline:2px dashed rgba(107,114,128,.35); outline-offset:6px}
+
+    /* Small helper */
+    .rowBtns{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="toprow">
+      <div class="title">
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="sub" id="dateLabel">–</div>
+      </div>
+
+      <div class="chiprow">
+        <span class="chip">Prüfung in: <b id="examCountdown">–</b></span>
+        <span class="chip">Heute: <b id="dayScore">0%</b></span>
+
+        <button class="btn" id="prevBtn" title="Vorheriger Tag">◀</button>
+        <button class="btn" id="todayBtn">Heute</button>
+        <button class="btn" id="nextBtn" title="Nächster Tag">▶</button>
+
+        <button class="btn primary" id="quickAddBtn">＋ Quick Add</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="grid">
+        <div class="card span8">
+          <h2>Heute Überblick</h2>
+          <div class="muted">Drag & Drop: Aufgaben lange drücken und ziehen. Bearbeiten über ✎.</div>
+
+          <div class="kpis">
+            <div class="kpi"><div class="v" id="kDone">0</div><div class="t">Erledigt</div></div>
+            <div class="kpi"><div class="v" id="kOpen">0</div><div class="t">Offen</div></div>
+            <div class="kpi"><div class="v" id="kFail">0</div><div class="t">Nicht geschafft</div></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <details class="acc" open>
+            <summary>✅ Tagesaufgaben</summary>
+            <div class="acc-body">
+
+              <div class="filters">
+                <button class="toggle active" id="filterAll">Alle</button>
+                <button class="toggle" id="filterOpen">Nur offen</button>
+
+                <select id="filterCat" class="toggle" style="height:40px">
+                  <option value="Alle">Kategorie: Alle</option>
+                  <option value="Schule">Schule</option>
+                  <option value="Powerbank">Powerbank</option>
+                  <option value="Training">Training</option>
+                  <option value="Gesundheit">Gesundheit</option>
+                  <option value="Organisation">Organisation</option>
+                </select>
+
+                <span class="chip">Tip: erst Schule, dann Business</span>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="list" id="dailyList"></div>
+
+              <div class="divider"></div>
+              <div class="inputs">
+                <select id="dailyCat">
+                  <option>Schule</option>
+                  <option>Powerbank</option>
+                  <option>Training</option>
+                  <option>Gesundheit</option>
+                  <option>Organisation</option>
+                </select>
+                <input class="grow" id="dailyTitle" placeholder="Neue Aufgabe (z.B. 2×25 Min Mathe)" />
+                <input class="grow" id="dailyNote" placeholder="Notiz optional (z.B. Thema)" />
+                <button class="btn" id="addDailyBtn">Hinzufügen</button>
+              </div>
+            </div>
+          </details>
+
+          <details class="acc">
+            <summary>📌 Wochenziele</summary>
+            <div class="acc-body">
+              <div class="progressRow">
+                <div class="bar"><div id="weekBar"></div></div>
+                <span class="chip">Woche: <b id="weekScore">0%</b></span>
+              </div>
+
+              <div class="divider"></div>
+              <div class="list" id="weeklyList"></div>
+
+              <div class="divider"></div>
+              <div class="inputs">
+                <select id="weeklyCat">
+                  <option>Schule</option>
+                  <option>Powerbank</option>
+                  <option>Training</option>
+                  <option>Gesundheit</option>
+                </select>
+                <input class="grow" id="weeklyTitle" placeholder="Neues Wochenziel (z.B. 10 Lernblöcke)" />
+                <button class="btn" id="addWeeklyBtn">Hinzufügen</button>
+                <button class="btn ghost" id="newWeekBtn">Neue Woche</button>
+              </div>
+
+              <div class="divider"></div>
+              <div class="inputs">
+                <input type="date" id="examDate" />
+                <button class="btn" id="saveExamBtn">Prüfungsdatum speichern</button>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="card span4">
+          <h2>Heute Log</h2>
+          <div class="muted">Schnell erfassen: Lernblock, Training, Meilenstein.</div>
+
+          <details class="acc" open>
+            <summary>🎓 Lernblöcke (25 Min)</summary>
+            <div class="acc-body">
+              <div class="inputs">
+                <select id="subjectSel">
+                  <option>Mathe</option><option>Englisch</option><option>EDV</option>
+                  <option>CAD</option><option>Deutsch/Kommunikation</option><option>Sonstiges</option>
+                </select>
+                <button class="btn" id="addStudyBtn">+ Block</button>
+              </div>
+
+              <div class="divider"></div>
+              <div class="rowBtns">
+                <span class="chip">Heute: <b id="studyToday">0</b></span>
+                <span class="chip">Woche: <b id="studyWeek">0</b></span>
+              </div>
+
+              <div class="divider"></div>
+              <div class="list" id="studyList"></div>
+            </div>
+          </details>
+
+          <details class="acc">
+            <summary>🥊 Training</summary>
+            <div class="acc-body">
+              <div class="inputs">
+                <select id="trainSel">
+                  <option>Technik</option><option>Kraft</option><option>Ausdauer</option>
+                </select>
+                <button class="btn" id="addTrainBtn">+ Einheit</button>
+              </div>
+
+              <div class="divider"></div>
+              <div class="rowBtns">
+                <span class="chip">Heute: <b id="trainToday">0</b></span>
+                <span class="chip">Woche: <b id="trainWeek">0</b></span>
+              </div>
+
+              <div class="divider"></div>
+              <div class="list" id="trainList"></div>
+            </div>
+          </details>
+
+          <details class="acc">
+            <summary>🔋 Powerbank Meilensteine</summary>
+            <div class="acc-body">
+              <div class="list" id="mileListSmall"></div>
+
+              <div class="divider"></div>
+              <div class="inputs">
+                <input class="grow" id="mileTitle" placeholder="Neuer Meilenstein (z.B. 1. Verkauf)" />
+                <button class="btn" id="addMileBtn">Hinzufügen</button>
+              </div>
+            </div>
+          </details>
+
+          <div class="divider"></div>
+          <div class="inputs">
+            <button class="btn small" id="exportBtn">⬇ Export</button>
+            <button class="btn small" id="importBtn">⬆ Import</button>
+            <button class="btn small ghost" id="resetDayBtn">Tag reset</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCHULE -->
+    <section class="page" id="page-schule">
+      <div class="grid">
+        <div class="card span12">
+          <h2>Schule</h2>
+          <div class="muted">Mach pro Fach Themen und hake sie ab. Nicht „alles lernen“, sondern Schritte.</div>
+
+          <details class="acc" open>
+            <summary>✅ Themenliste</summary>
+            <div class="acc-body">
+              <div class="inputs">
+                <select id="planSubject">
+                  <option>Mathe</option><option>Englisch</option><option>EDV</option>
+                  <option>CAD</option><option>Deutsch/Kommunikation</option><option>Sonstiges</option>
+                </select>
+                <input class="grow" id="planTitle" placeholder="Thema (z.B. Quadratische Funktionen: Nullstellen)" />
+                <button class="btn" id="addPlanBtn">Hinzufügen</button>
+              </div>
+
+              <div class="divider"></div>
+              <div class="list" id="planList"></div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- POWERBANK -->
+    <section class="page" id="page-powerbank">
+      <div class="grid">
+        <div class="card span12">
+          <h2>Powerbank</h2>
+          <div class="muted">Einfach: Output (Content) → Antworten → Verkäufe. Tracke Meilensteine.</div>
+
+          <details class="acc" open>
+            <summary>🏁 Meilensteine</summary>
+            <div class="acc-body">
+              <div class="list" id="mileList"></div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRAINING -->
+    <section class="page" id="page-training">
+      <div class="grid">
+        <div class="card span12">
+          <h2>Training</h2>
+          <div class="muted">Konsequenz schlägt alles. Tracke Einheiten und bleib dran.</div>
+
+          <details class="acc" open>
+            <summary>🥊 Einheiten Log</summary>
+            <div class="acc-body">
+              <div class="list" id="trainAll"></div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- GESUNDHEIT -->
+    <section class="page" id="page-gesundheit">
+      <div class="grid">
+        <div class="card span12">
+          <h2>Gesundheit & Ernährung</h2>
+          <div class="muted">Wasser, Schritte, Schlaf + kurze Essensnotiz.</div>
+
+          <details class="acc" open>
+            <summary>💧 Tageswerte</summary>
+            <div class="acc-body">
+              <div class="inputs">
+                <input type="number" id="water" min="0" step="0.1" placeholder="Wasser (Liter)" />
+                <input type="number" id="steps" min="0" step="100" placeholder="Schritte" />
+                <input type="number" id="sleep" min="0" step="0.5" placeholder="Schlaf (Stunden)" />
+                <button class="btn" id="saveHealthBtn">Speichern</button>
+              </div>
+
+              <div class="divider"></div>
+
+              <textarea id="foodNotes" placeholder="Ernährung Notiz (kurz)"></textarea>
+              <div class="inputs" style="margin-top:10px">
+                <button class="btn" id="saveFoodBtn">Notiz speichern</button>
+                <button class="btn ghost" id="clearFoodBtn">Notiz leeren</button>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottomNav">
+    <div class="row" id="nav">
+      <button data-page="dashboard" class="active">🏠<br>Home</button>
+      <button data-page="schule">🎓<br>Schule</button>
+      <button data-page="powerbank">🔋<br>Business</button>
+      <button data-page="training">🥊<br>Training</button>
+      <button data-page="gesundheit">🍽️<br>Health</button>
+    </div>
+  </nav>
+
+  <!-- Quick Add Modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modalHead">
+        <h3>Quick Add</h3>
+        <button class="btn small" id="closeModal">Schließen</button>
+      </div>
+      <div class="divider"></div>
+
+      <div class="modalGrid">
+        <div class="col6">
+          <div class="muted" style="font-weight:900">Tagesaufgabe</div>
+          <div class="divider"></div>
+          <div class="inputs">
+            <select id="qaCat">
+              <option>Schule</option><option>Powerbank</option><option>Training</option>
+              <option>Gesundheit</option><option>Organisation</option>
+            </select>
+            <input class="grow" id="qaTitle" placeholder="Titel" />
+          </div>
+          <div class="inputs" style="margin-top:10px">
+            <input class="grow" id="qaNote" placeholder="Notiz optional" />
+            <button class="btn" id="qaAdd">Hinzufügen</button>
+          </div>
+        </div>
+
+        <div class="col6">
+          <div class="muted" style="font-weight:900">Log (Block/Training)</div>
+          <div class="divider"></div>
+          <div class="inputs">
+            <select id="qaType">
+              <option value="study">Lernblock (25 Min)</option>
+              <option value="train">Trainingseinheit</option>
+            </select>
+            <select id="qaVal">
+              <option>Mathe</option><option>Englisch</option><option>EDV</option><option>CAD</option>
+              <option>Technik</option><option>Kraft</option><option>Ausdauer</option>
+            </select>
+            <button class="btn" id="qaAddLog">Hinzufügen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="overlay" id="editOverlay">
+    <div class="modal">
+      <div class="modalHead">
+        <h3>Aufgabe bearbeiten</h3>
+        <button class="btn small" id="closeEdit">Schließen</button>
+      </div>
+      <div class="divider"></div>
+      <div class="inputs">
+        <select id="editCat">
+          <option>Schule</option><option>Powerbank</option><option>Training</option><option>Gesundheit</option><option>Organisation</option>
+        </select>
+        <input class="grow" id="editTitle" placeholder="Titel" />
+      </div>
+      <div class="inputs" style="margin-top:10px">
+        <input class="grow" id="editNote" placeholder="Notiz" />
+        <button class="btn primary" id="saveEdit">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2,'0');
+  const toISO = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const fromISO = (s) => { const [y,m,dd] = s.split('-').map(Number); return new Date(y, m-1, dd); };
+  const esc = (s) => String(s).replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+  function formatDate(d){
+    const days = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+    return `${days[d.getDay()]}, ${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`;
+  }
+  function startOfWeek(d){
+    const x = new Date(d);
+    const day = (x.getDay()+6)%7;
+    x.setDate(x.getDate()-day);
+    x.setHours(0,0,0,0);
+    return x;
+  }
+  function weekKey(d){ return `week:${toISO(startOfWeek(d))}`; }
+
+  const KEY = "mein_plan_premium_clean_v1";
+  const defaultState = () => ({
+    page:"dashboard",
+    selectedDate: toISO(new Date()),
+    examDate:"",
+    dailyByDate:{},
+    weeklyByWeek:{},
+    studyLog:[],
+    trainLog:[],
+    milestones:[],
+    healthByDate:{},
+    schoolPlan:[],
+    filters:{ onlyOpen:false, cat:"Alle" }
+  });
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      if(!raw) return defaultState();
+      return { ...defaultState(), ...JSON.parse(raw) };
+    }catch{ return defaultState(); }
+  }
+  function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+  let state = load();
+
+  function ensureDaily(dateISO){
+    if(!state.dailyByDate[dateISO]){
+      state.dailyByDate[dateISO] = [
+        {id: crypto.randomUUID(), cat:"Schule", title:"2× 25 Min Lernen", note:"Fach auswählen", status:null},
+        {id: crypto.randomUUID(), cat:"Powerbank", title:"30 Min Output (drehen/posten/antworten)", note:"1 Task", status:null},
+        {id: crypto.randomUUID(), cat:"Training", title:"20–45 Min Training", note:"Technik/Kraft/Ausdauer", status:null},
+        {id: crypto.randomUUID(), cat:"Organisation", title:"Schul Orga / Hausaufgaben", note:"10–20 Min", status:null},
+        {id: crypto.randomUUID(), cat:"Gesundheit", title:"Wasser + Schlaf im Blick", note:"2L / 7h", status:null},
+      ];
+    }
+  }
+  function ensureWeekly(wk){
+    if(!state.weeklyByWeek[wk]){
+      state.weeklyByWeek[wk] = [
+        {id: crypto.randomUUID(), cat:"Schule", title:"10 Lernblöcke (25 Min)", done:false},
+        {id: crypto.randomUUID(), cat:"Powerbank", title:"15 Videos posten", done:false},
+        {id: crypto.randomUUID(), cat:"Training", title:"5 Einheiten", done:false},
+      ];
+    }
+  }
+  function ensureMilestones(){
+    if(!state.milestones || state.milestones.length===0){
+      state.milestones = [
+        {id: crypto.randomUUID(), title:"Erste Anfrage", done:false},
+        {id: crypto.randomUUID(), title:"Erster Verkauf", done:false},
+        {id: crypto.randomUUID(), title:"10 Verkäufe", done:false},
+      ];
+    }
+  }
+
+  // Pages
+  function setPage(p){
+    state.page = p;
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    const el = $("page-"+p);
+    if(el) el.classList.add('active');
+
+    document.querySelectorAll('#nav button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.page===p);
+    });
+
+    const titles = {dashboard:"Dashboard", schule:"Schule", powerbank:"Powerbank", training:"Training", gesundheit:"Gesundheit"};
+    $("pageTitle").textContent = titles[p] || "Mein Plan";
+    save();
+  }
+
+  // Exam
+  function renderExam(){
+    if(!state.examDate){
+      $("examCountdown").textContent = "–";
+      $("examDate").value = "";
+      return;
+    }
+    $("examDate").value = state.examDate;
+    const today = fromISO(state.selectedDate);
+    const ex = fromISO(state.examDate);
+    const diff = Math.ceil((ex - today) / (1000*60*60*24));
+    $("examCountdown").textContent = diff >= 0 ? `${diff} Tage` : `vorbei`;
+  }
+
+  // Daily list render with filters + drag
+  let dragFromIndex = null;
+
+  function filteredDaily(items){
+    let out = items.slice();
+    if(state.filters.cat && state.filters.cat !== "Alle"){
+      out = out.filter(x=>x.cat === state.filters.cat);
+    }
+    if(state.filters.onlyOpen){
+      out = out.filter(x=>x.status !== true && x.status !== false);
+    }
+    return out;
+  }
+
+  function renderDaily(){
+    const list = $("dailyList");
+    list.innerHTML = "";
+    const allItems = state.dailyByDate[state.selectedDate];
+    const view = filteredDaily(allItems);
+
+    // mapping: we render items but need their original index for reordering
+    const indices = view.map(v => allItems.findIndex(x => x.id === v.id));
+
+    view.forEach((it, i)=>{
+      const originalIndex = indices[i];
+
+      const dot = it.status === true ? "dot ok" : it.status === false ? "dot bad" : "dot";
+      const statusTag = it.status === true
+        ? `<span class="tag ok">Erledigt</span>`
+        : it.status === false
+          ? `<span class="tag bad">Nicht geschafft</span>`
+          : `<span class="tag">Offen</span>`;
+
+      const el = document.createElement("div");
+      el.className = "item";
+      el.setAttribute("draggable", "true");
+      el.dataset.index = String(originalIndex);
+
+      el.innerHTML = `
+        <div class="left">
+          <div class="${dot}"></div>
+          <div>
+            <div class="it-title">${esc(it.title)}</div>
+            <div class="it-note">${esc(it.note||"")}</div>
+            <div class="tags">
+              <span class="tag">${esc(it.cat)}</span>
+              ${statusTag}
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="icon drag" title="Ziehen">↕</button>
+          <button class="icon" title="Bearbeiten">✎</button>
+          <button class="icon ok" title="Erledigt">✓</button>
+          <button class="icon bad" title="Nicht geschafft">✕</button>
+          <button class="icon" title="Offen">↺</button>
+          <button class="icon" title="Löschen">🗑</button>
+        </div>
+      `;
+
+      const btns = el.querySelectorAll("button");
+      const bDrag = btns[0], bEdit = btns[1], bOk = btns[2], bBad = btns[3], bReset = btns[4], bDel = btns[5];
+
+      // Edit
+      bEdit.onclick = ()=> openEdit(it.id);
+
+      // Status
+      bOk.onclick = ()=>{ it.status=true; render(); };
+      bBad.onclick = ()=>{ it.status=false; render(); };
+      bReset.onclick = ()=>{ it.status=null; render(); };
+
+      // Delete
+      bDel.onclick = ()=>{
+        state.dailyByDate[state.selectedDate] = allItems.filter(x=>x.id!==it.id);
+        render();
+      };
+
+      // Drag logic (use whole item; button is just a hint)
+      el.addEventListener("dragstart", (e)=>{
+        dragFromIndex = Number(el.dataset.index);
+        el.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+      });
+      el.addEventListener("dragend", ()=>{
+        dragFromIndex = null;
+        el.classList.remove("dragging");
+        document.querySelectorAll(".item").forEach(x=>x.classList.remove("dropHint"));
+      });
+      el.addEventListener("dragover", (e)=>{
+        e.preventDefault();
+        el.classList.add("dropHint");
+      });
+      el.addEventListener("dragleave", ()=>{
+        el.classList.remove("dropHint");
+      });
+      el.addEventListener("drop", (e)=>{
+        e.preventDefault();
+        el.classList.remove("dropHint");
+        const toIndex = Number(el.dataset.index);
+        if(dragFromIndex === null || Number.isNaN(toIndex) || toIndex === dragFromIndex) return;
+
+        const arr = state.dailyByDate[state.selectedDate];
+        const [moved] = arr.splice(dragFromIndex, 1);
+        arr.splice(toIndex, 0, moved);
+        render();
+      });
+
+      list.appendChild(el);
+    });
+  }
+
+  // Weekly
+  function renderWeekly(wk){
+    const list = $("weeklyList");
+    list.innerHTML = "";
+    const items = state.weeklyByWeek[wk];
+
+    items.forEach(it=>{
+      const el = document.createElement("div");
+      el.className = "item";
+      el.innerHTML = `
+        <div class="left">
+          <div class="${it.done ? 'dot ok':'dot'}"></div>
+          <div>
+            <div class="it-title">${esc(it.title)}</div>
+            <div class="tags">
+              <span class="tag">${esc(it.cat)}</span>
+              ${it.done ? `<span class="tag ok">Erledigt</span>` : `<span class="tag">Offen</span>`}
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="icon ok" title="Toggle">✓</button>
+          <button class="icon" title="Löschen">🗑</button>
+        </div>
+      `;
+      const [tog, del] = el.querySelectorAll("button");
+      tog.onclick = ()=>{ it.done=!it.done; render(); };
+      del.onclick = ()=>{ state.weeklyByWeek[wk] = items.filter(x=>x.id!==it.id); render(); };
+      list.appendChild(el);
+    });
+  }
+
+  // Milestones
+  function renderMilestones(){
+    ensureMilestones();
+    const lists = [$("mileList"), $("mileListSmall")].filter(Boolean);
+    for(const list of lists){
+      list.innerHTML = "";
+      state.milestones.forEach(m=>{
+        const el = document.createElement("div");
+        el.className = "item";
+        el.innerHTML = `
+          <div class="left">
+            <div class="${m.done ? 'dot ok':'dot'}"></div>
+            <div>
+              <div class="it-title">${esc(m.title)}</div>
+              <div class="tags">${m.done ? `<span class="tag ok">Erledigt</span>` : `<span class="tag">Offen</span>`}</div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="icon ok" title="Toggle">✓</button>
+            <button class="icon" title="Löschen">🗑</button>
+          </div>
+        `;
+        const [tog, del] = el.querySelectorAll("button");
+        tog.onclick = ()=>{ m.done=!m.done; render(); };
+        del.onclick = ()=>{ state.milestones = state.milestones.filter(x=>x.id!==m.id); render(); };
+        list.appendChild(el);
+      });
+    }
+  }
+
+  // Study
+  function renderStudy(){
+    const dISO = state.selectedDate;
+    const wkStart = startOfWeek(fromISO(dISO));
+    const wkEnd = new Date(wkStart); wkEnd.setDate(wkEnd.getDate()+7);
+
+    $("studyToday").textContent = state.studyLog.filter(x=>x.dateISO===dISO).length;
+    $("studyWeek").textContent = state.studyLog.filter(x=>{
+      const dt = fromISO(x.dateISO);
+      return dt>=wkStart && dt<wkEnd;
+    }).length;
+
+    const list = $("studyList");
+    list.innerHTML = "";
+    state.studyLog.filter(x=>x.dateISO===dISO).slice(-6).reverse().forEach(x=>{
+      const el = document.createElement("div");
+      el.className = "item";
+      el.innerHTML = `
+        <div class="left">
+          <div class="dot ok"></div>
+          <div>
+            <div class="it-title">${esc(x.subject)} <span class="tag ok">${x.minutes} Min</span></div>
+            <div class="it-note">${new Date(x.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+          </div>
+        </div>
+        <div class="actions"><button class="icon" title="Löschen">🗑</button></div>
+      `;
+      el.querySelector("button").onclick = ()=>{ state.studyLog = state.studyLog.filter(y=>y.ts!==x.ts); render(); };
+      list.appendChild(el);
+    });
+  }
+
+  // Training
+  function renderTrain(){
+    const dISO = state.selectedDate;
+    const wkStart = startOfWeek(fromISO(dISO));
+    const wkEnd = new Date(wkStart); wkEnd.setDate(wkEnd.getDate()+7);
+
+    $("trainToday").textContent = state.trainLog.filter(x=>x.dateISO===dISO).length;
+    $("trainWeek").textContent = state.trainLog.filter(x=>{
+      const dt = fromISO(x.dateISO);
+      return dt>=wkStart && dt<wkEnd;
+    }).length;
+
+    const list = $("trainList");
+    list.innerHTML = "";
+    state.trainLog.filter(x=>x.dateISO===dISO).slice(-6).reverse().forEach(x=>{
+      const el = document.createElement("div");
+      el.className = "item";
+      el.innerHTML = `
+        <div class="left">
+          <div class="dot ok"></div>
+          <div>
+            <div class="it-title">${esc(x.type)} <span class="tag ok">Einheit</span></div>
+            <div class="it-note">${new Date(x.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+          </div>
+        </div>
+        <div class="actions"><button class="icon" title="Löschen">🗑</button></div>
+      `;
+      el.querySelector("button").onclick = ()=>{ state.trainLog = state.trainLog.filter(y=>y.ts!==x.ts); render(); };
+      list.appendChild(el);
+    });
+
+    const all = $("trainAll");
+    all.innerHTML = "";
+    state.trainLog.slice().reverse().slice(0,40).forEach(x=>{
+      const el = document.createElement("div");
+      el.className = "item";
+      el.innerHTML = `
+        <div class="left">
+          <div class="dot ok"></div>
+          <div>
+            <div class="it-title">${esc(x.type)}</div>
+            <div class="it-note">${esc(x.dateISO)} · ${new Date(x.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+          </div>
+        </div>
+        <div class="actions"><button class="icon" title="Löschen">🗑</button></div>
+      `;
+      el.querySelector("button").onclick = ()=>{ state.trainLog = state.trainLog.filter(y=>y.ts!==x.ts); render(); };
+      all.appendChild(el);
+    });
+  }
+
+  // Health
+  function renderHealth(){
+    const h = state.healthByDate[state.selectedDate] || {};
+    $("water").value = h.water ?? "";
+    $("steps").value = h.steps ?? "";
+    $("sleep").value = h.sleep ?? "";
+    $("foodNotes").value = h.foodNotes ?? "";
+  }
+
+  // School plan
+  function renderPlan(){
+    const list = $("planList");
+    list.innerHTML = "";
+    state.schoolPlan.slice().reverse().forEach(t=>{
+      const el = document.createElement("div");
+      el.className = "item";
+      el.innerHTML = `
+        <div class="left">
+          <div class="${t.done ? 'dot ok':'dot'}"></div>
+          <div>
+            <div class="it-title">${esc(t.title)}</div>
+            <div class="tags">
+              <span class="tag">${esc(t.subject)}</span>
+              ${t.done ? `<span class="tag ok">Erledigt</span>` : `<span class="tag">Offen</span>`}
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="icon ok" title="Toggle">✓</button>
+          <button class="icon" title="Löschen">🗑</button>
+        </div>
+      `;
+      const [tog, del] = el.querySelectorAll("button");
+      tog.onclick = ()=>{ t.done=!t.done; render(); };
+      del.onclick = ()=>{ state.schoolPlan = state.schoolPlan.filter(x=>x.id!==t.id); render(); };
+      list.appendChild(el);
+    });
+  }
+
+  // Scores
+  function computeScores(wk){
+    const daily = state.dailyByDate[state.selectedDate] || [];
+    const total = daily.length || 1;
+    const done = daily.filter(x=>x.status===true).length;
+    const fail = daily.filter(x=>x.status===false).length;
+    const open = total - done - fail;
+
+    $("kDone").textContent = done;
+    $("kFail").textContent = fail;
+    $("kOpen").textContent = open;
+
+    $("dayScore").textContent = `${Math.round((done/total)*100)}%`;
+
+    const weekly = state.weeklyByWeek[wk] || [];
+    const wTotal = weekly.length || 1;
+    const wDone = weekly.filter(x=>x.done).length;
+    const wScore = Math.round((wDone/wTotal)*100);
+    $("weekScore").textContent = `${wScore}%`;
+    $("weekBar").style.width = `${wScore}%`;
+  }
+
+  // Render all
+  function render(){
+    setPage(state.page);
+
+    const d = fromISO(state.selectedDate);
+    $("dateLabel").textContent = formatDate(d);
+
+    ensureDaily(state.selectedDate);
+    const wk = weekKey(d);
+    ensureWeekly(wk);
+    ensureMilestones();
+
+    renderExam();
+    renderDaily();
+    renderWeekly(wk);
+    renderMilestones();
+    renderStudy();
+    renderTrain();
+    renderHealth();
+    renderPlan();
+    computeScores(wk);
+
+    save();
+  }
+
+  // Navigation
+  document.querySelectorAll('#nav button').forEach(btn=>{
+    btn.onclick = ()=>{ setPage(btn.dataset.page); render(); };
+  });
+
+  // Date controls
+  $("prevBtn").onclick = ()=>{ const d = fromISO(state.selectedDate); d.setDate(d.getDate()-1); state.selectedDate = toISO(d); render(); };
+  $("nextBtn").onclick = ()=>{ const d = fromISO(state.selectedDate); d.setDate(d.getDate()+1); state.selectedDate = toISO(d); render(); };
+  $("todayBtn").onclick = ()=>{ state.selectedDate = toISO(new Date()); render(); };
+
+  // Add daily
+  $("addDailyBtn").onclick = ()=>{
+    const title = $("dailyTitle").value.trim();
+    if(!title) return;
+    state.dailyByDate[state.selectedDate].push({
+      id: crypto.randomUUID(),
+      cat: $("dailyCat").value,
+      title,
+      note: $("dailyNote").value.trim(),
+      status: null
+    });
+    $("dailyTitle").value = "";
+    $("dailyNote").value = "";
+    render();
+  };
+
+  // Weekly
+  $("addWeeklyBtn").onclick = ()=>{
+    const title = $("weeklyTitle").value.trim();
+    if(!title) return;
+    const wk = weekKey(fromISO(state.selectedDate));
+    state.weeklyByWeek[wk].push({ id: crypto.randomUUID(), cat: $("weeklyCat").value, title, done:false });
+    $("weeklyTitle").value = "";
+    render();
+  };
+  $("newWeekBtn").onclick = ()=>{
+    const wk = weekKey(fromISO(state.selectedDate));
+    state.weeklyByWeek[wk].forEach(x=>x.done=false);
+    render();
+  };
+
+  // Exam
+  $("saveExamBtn").onclick = ()=>{ state.examDate = $("examDate").value || ""; render(); };
+
+  // Study / Train
+  $("addStudyBtn").onclick = ()=>{ state.studyLog.push({ts: Date.now(), dateISO: state.selectedDate, subject: $("subjectSel").value, minutes:25}); render(); };
+  $("addTrainBtn").onclick = ()=>{ state.trainLog.push({ts: Date.now(), dateISO: state.selectedDate, type: $("trainSel").value}); render(); };
+
+  // Milestones
+  $("addMileBtn").onclick = ()=>{
+    const title = $("mileTitle").value.trim();
+    if(!title) return;
+    state.milestones.push({id: crypto.randomUUID(), title, done:false});
+    $("mileTitle").value="";
+    render();
+  };
+
+  // Plan
+  $("addPlanBtn").onclick = ()=>{
+    const title = $("planTitle").value.trim();
+    if(!title) return;
+    state.schoolPlan.push({id: crypto.randomUUID(), subject: $("planSubject").value, title, done:false});
+    $("planTitle").value="";
+    render();
+  };
+
+  // Health
+  $("saveHealthBtn").onclick = ()=>{
+    const water = $("water").value ? Number($("water").value) : null;
+    const steps = $("steps").value ? Number($("steps").value) : null;
+    const sleep = $("sleep").value ? Number($("sleep").value) : null;
+    state.healthByDate[state.selectedDate] = { ...(state.healthByDate[state.selectedDate]||{}), water, steps, sleep };
+    render();
+  };
+  $("saveFoodBtn").onclick = ()=>{
+    state.healthByDate[state.selectedDate] = { ...(state.healthByDate[state.selectedDate]||{}), foodNotes: $("foodNotes").value };
+    render();
+  };
+  $("clearFoodBtn").onclick = ()=>{
+    state.healthByDate[state.selectedDate] = { ...(state.healthByDate[state.selectedDate]||{}), foodNotes: "" };
+    render();
+  };
+
+  // Export/Import
+  $("exportBtn").onclick = ()=>{
+    const data = JSON.stringify(state, null, 2);
+    const blob = new Blob([data], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "mein_plan_backup.json";
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
+  $("importBtn").onclick = async ()=>{
+    const inp = document.createElement("input");
+    inp.type="file"; inp.accept="application/json";
+    inp.onchange = async ()=>{
+      const file = inp.files[0];
+      if(!file) return;
+      const text = await file.text();
+      try{
+        state = { ...defaultState(), ...JSON.parse(text) };
+        save();
+        render();
+      }catch{
+        alert("Import fehlgeschlagen. Datei ist kein gültiges JSON.");
+      }
+    };
+    inp.click();
+  };
+
+  // Reset day
+  $("resetDayBtn").onclick = ()=>{
+    ensureDaily(state.selectedDate);
+    state.dailyByDate[state.selectedDate].forEach(x=>x.status=null);
+    render();
+  };
+
+  // Filters
+  $("filterAll").onclick = ()=>{
+    state.filters.onlyOpen = false;
+    $("filterAll").classList.add("active");
+    $("filterOpen").classList.remove("active");
+    render();
+  };
+  $("filterOpen").onclick = ()=>{
+    state.filters.onlyOpen = true;
+    $("filterOpen").classList.add("active");
+    $("filterAll").classList.remove("active");
+    render();
+  };
+  $("filterCat").value = state.filters.cat === "Alle" ? "Alle" : state.filters.cat;
+  $("filterCat").onchange = ()=>{
+    const v = $("filterCat").value;
+    state.filters.cat = (v === "Alle" || v.startsWith("Kategorie")) ? "Alle" : v;
+    render();
+  };
+
+  // Quick add modal
+  function openModal(){ $("overlay").style.display="flex"; }
+  function closeModal(){ $("overlay").style.display="none"; }
+  $("quickAddBtn").onclick = openModal;
+  $("closeModal").onclick = closeModal;
+  $("overlay").addEventListener("click",(e)=>{ if(e.target===$("overlay")) closeModal(); });
+
+  $("qaAdd").onclick = ()=>{
+    const title = $("qaTitle").value.trim();
+    if(!title) return;
+    ensureDaily(state.selectedDate);
+    state.dailyByDate[state.selectedDate].push({
+      id: crypto.randomUUID(),
+      cat: $("qaCat").value,
+      title,
+      note: $("qaNote").value.trim(),
+      status:null
+    });
+    $("qaTitle").value=""; $("qaNote").value="";
+    closeModal();
+    render();
+  };
+  $("qaAddLog").onclick = ()=>{
+    const type = $("qaType").value;
+    const val = $("qaVal").value;
+    if(type==="study") state.studyLog.push({ts: Date.now(), dateISO: state.selectedDate, subject: val, minutes:25});
+    else state.trainLog.push({ts: Date.now(), dateISO: state.selectedDate, type: val});
+    closeModal();
+    render();
+  };
+
+  // Edit modal
+  let editId = null;
+  function openEdit(id){
+    editId = id;
+    const items = state.dailyByDate[state.selectedDate] || [];
+    const it = items.find(x=>x.id===id);
+    if(!it) return;
+    $("editCat").value = it.cat;
+    $("editTitle").value = it.title;
+    $("editNote").value = it.note || "";
+    $("editOverlay").style.display="flex";
+  }
+  function closeEdit(){
+    editId = null;
+    $("editOverlay").style.display="none";
+  }
+  $("closeEdit").onclick = closeEdit;
+  $("editOverlay").addEventListener("click",(e)=>{ if(e.target===$("editOverlay")) closeEdit(); });
+
+  $("saveEdit").onclick = ()=>{
+    const items = state.dailyByDate[state.selectedDate] || [];
+    const it = items.find(x=>x.id===editId);
+    if(!it) return closeEdit();
+    it.cat = $("editCat").value;
+    it.title = $("editTitle").value.trim() || it.title;
+    it.note = $("editNote").value.trim();
+    closeEdit();
+    render();
+  };
+
+  // Boot
+  render();
+</script>
+</body>
+</html>
